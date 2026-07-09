@@ -6,12 +6,12 @@
 // parallel) into the browser's Cache Storage (on disk, survives
 // refresh). A cached video starts instantly and is fully seekable.
 
-// The bottleneck is total bandwidth (~300 KB/s to Tally, shared across
-// connections), so more parallelism doesn't download faster — it only
-// delays the FIRST video from becoming ready. 2 keeps the next video
-// arriving soonest without one giant file blocking the whole queue.
+// Measured 2026-07-10: one connection gets ~140 KB/s but the line
+// carries ~350 KB/s total — it takes 3 parallel downloads to saturate
+// it (6 adds nothing). 3 is the sweet spot: full line speed without
+// making the FIRST video wait behind too many siblings.
 const CACHE_NAME = "pec-videos-v1";
-const CONCURRENCY = 2;
+const CONCURRENCY = 3;
 
 const keyFor = (fileId) => `https://pec.video.cache/${encodeURIComponent(fileId)}`;
 

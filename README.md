@@ -1,29 +1,18 @@
 # PEC Project Reviewer v2
 
-One tool for the whole weekly review: **import the Tally CSV → watch every project (streams instantly, no downloading) → shortlist → pick the Top 3 with reasons → copy a ready-to-share message.** Everything is saved to a shared database, so the whole team sees the same state and nothing is lost on refresh.
+One tool for the whole weekly review: **import the Tally CSV → watch every project → shortlist → pick the Top 3 with reasons → copy a ready-to-share message.**
 
 ---
 
-## 1. One-time setup: the shared database (Supabase, free)
+## 1. How your work is saved
 
-Until this step is done the app still works in **"Local mode"** — your marks are saved in your own browser only. Doing this step turns on **"Team sync"** for everyone.
+The app runs in **Local mode**: every mark (reviewed, shortlist, notes, ranks, reasons) is saved in your browser instantly and survives refresh and restarts. No account, no server, no setup. Downloaded videos are also kept in the browser, so a week you've prepared stays instant.
 
-1. Go to [supabase.com](https://supabase.com) and sign up (free).
-2. Click **New project**. Name it `pec-reviewer`, set any strong database password (you won't need it day-to-day), pick the region closest to you (Mumbai), and create it.
-3. In the left sidebar open **SQL Editor** → **New query**. Open the file [`supabase/schema.sql`](supabase/schema.sql) from this repo, copy ALL of it, paste it into the query box and press **Run**. You should see "Success".
-4. In the left sidebar open **Settings → API**. You'll see two things you need:
-   - **Project URL** (looks like `https://abcdefgh.supabase.co`)
-   - **anon public** key (a long string starting with `eyJ...`)
-5. Open [`js/config.js`](js/config.js) in this repo and paste them between the quotes:
+Two things to know:
+- Your marks live in **your** browser. A teammate opening the link sees the same candidates only after importing the same CSV, and keeps their own marks.
+- If you clear the browser's site data, marks and downloaded videos are gone. Don't clear it mid-week.
 
-   ```js
-   export const SUPABASE_URL = "https://abcdefgh.supabase.co";
-   export const SUPABASE_ANON_KEY = "eyJ...";
-   ```
-
-6. Save, commit, and deploy (next section). The badge in the top-right of the app switches from **"Local mode"** to **"Team sync"**.
-
-> **Is it safe to commit the anon key?** Yes — the anon key is designed to be public (every visitor's browser gets it anyway). What must **never** be committed is the `service_role` key — don't copy that one. Note that anyone who has the app's URL and the anon key can read/write review data, so share the app link only with your team.
+*(If you ever need several reviewers sharing one live set of marks, there's an optional Supabase mode — see [`js/config.js`](js/config.js) and [`supabase/schema.sql`](supabase/schema.sql).)*
 
 ## 2. Deploying the app (GitHub Pages)
 
@@ -32,7 +21,7 @@ The app is 100% static files, so GitHub Pages works perfectly — same setup as 
 1. Push this folder to a GitHub repository (e.g. `pec-project-reviewer-v2` under the `proeditorsclub` account).
 2. In the repo: **Settings → Pages → Source: Deploy from a branch → Branch: `main`, folder `/ (root)`** → Save.
 3. After a minute the app is live at `https://proeditorsclub.github.io/pec-project-reviewer-v2/`.
-4. Share that link with the review team. That's it — future updates deploy automatically on every push.
+4. That's it — future updates deploy automatically on every push. Already live at https://proeditorsclub.github.io/pec-project-reviewer-v2/.
 
 ## 3. Every week: the review flow
 
@@ -59,5 +48,5 @@ The app is 100% static files, so GitHub Pages works perfectly — same setup as 
 ## Notes & limits
 
 - Tally's video links are signed URLs served with `Content-Disposition: inline` and CORS open to `proeditorsclub.github.io` — they play directly in the browser `<video>` tag (verified with real B14 submissions). The links embed an access token; if old links ever stop working, just re-import the latest CSV export — every import refreshes all links for free.
-- Tally's storage is slow (~300 KB/s per connection) and ignores byte-range requests. The app works around this by **downloading upcoming videos in the background** (3 at a time, closest to your current position first) into the browser's disk cache. Items marked **⚡** play instantly and are fully seekable; the ⬇ badge shows a download in progress. The cache survives refresh, so a week you've already been through stays instant. Only the very first video you open in a session may need to buffer the old-fashioned way.
+- **Playback speed is limited by your internet connection**, not by the tool or by where it's hosted — the videos always travel from Tally's storage to your browser. Tally throttles each connection, so the app **downloads 3 videos in parallel in the background** (measured as the point that saturates a typical line), closest to your current position first, into the browser's disk cache. Items marked **▶ ready** play instantly and are fully seekable; the pulsing ⬇ shows what's downloading. The cache survives refresh. Practical tip: open the app and import 15–30 minutes before you start reviewing (or leave the tab open in the background) so videos are ready ahead of you — and review on the fastest network you have.
 - Some students occasionally upload a screenshot instead of a video — those show a ⚠ marker and an "open file" link instead of the player.
