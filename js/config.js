@@ -14,5 +14,5 @@
 // it is not shared with the team.
 // ====================================================================
 
-export const SUPABASE_URL = "";
-export const SUPABASE_ANON_KEY = "";
+export const SUPABASE_URL = "https://ehqknlzuovqesnqirvlk.supabase.co";
+export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVocWtubHp1b3ZxZXNucWlydmxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MTMyOTAsImV4cCI6MjA5OTE4OTI5MH0.9SEkCNxgU23mhwEvAyxuIjcY9rW5Qs50m713eBMNElg";
