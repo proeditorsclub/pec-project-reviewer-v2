@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PEC Project Reviewer v2</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🎬 <strong>PEC Reviewer</strong> <span class="v2">v2</span></div>
+    <div class="topbar-controls">
+      <select id="weekSelect" title="Week to review"></select>
+      <button id="importBtn" class="btn primary">⬆ Import CSV</button>
+      <span id="modeBadge" class="badge" title=""></span>
+    </div>
+    <nav class="tabs">
+      <button id="tabReview" class="tab active">Review</button>
+      <button id="tabTop3" class="tab">Top 3 &amp; Message</button>
+    </nav>
+  </header>
+
+  <!-- ============ REVIEW VIEW ============ -->
+  <main id="reviewView" class="view">
+    <aside class="candidate-list-panel">
+      <div class="list-header">
+        <span id="listTitle">Candidates</span>
+        <span id="listCount" class="count"></span>
+      </div>
+      <div id="candidateList" class="candidate-list"></div>
+      <div id="emptyState" class="empty-state hidden">
+        <p>No candidates yet.</p>
+        <p>Export the week's CSV from Tally and hit <strong>Import CSV</strong>.</p>
+      </div>
+    </aside>
+
+    <section class="player-panel">
+      <div class="player-wrap">
+        <div id="nameOverlay" class="name-overlay hidden"></div>
+        <video id="player" controls preload="metadata" playsinline></video>
+        <div id="playerPlaceholder" class="player-placeholder">Select a candidate to start reviewing</div>
+        <div id="notVideoNotice" class="not-video hidden"></div>
+      </div>
+
+      <div class="player-bar">
+        <button id="prevBtn" class="btn" title="Previous (Shift+←)">◀ Prev</button>
+        <div class="speed-group" id="speedGroup">
+          <button class="btn speed" data-speed="1">1×</button>
+          <button class="btn speed" data-speed="1.25">1.25×</button>
+          <button class="btn speed" data-speed="1.5">1.5×</button>
+          <button class="btn speed" data-speed="2">2×</button>
+        </div>
+        <button id="nextBtn" class="btn" title="Next (Shift+→)">Next ▶</button>
+      </div>
+
+      <div id="reviewControls" class="review-controls hidden">
+        <div class="control-row">
+          <label class="check-pill">
+            <input type="checkbox" id="reviewedToggle"> Reviewed <kbd>D</kbd>
+          </label>
+          <label class="check-pill star">
+            <input type="checkbox" id="shortlistToggle"> ★ Shortlist <kbd>S</kbd>
+          </label>
+          <a id="openRawLink" class="raw-link" target="_blank" rel="noopener">open file ↗</a>
+        </div>
+        <textarea id="notesInput" placeholder="Notes about this project… (saved automatically)"></textarea>
+        <div id="saveStatus" class="save-status"></div>
+      </div>
+
+      <div class="shortcuts-hint">
+        <kbd>Space</kbd> play/pause &nbsp; <kbd>←</kbd><kbd>→</kbd> seek 5s &nbsp;
+        <kbd>Shift+←</kbd><kbd>Shift+→</kbd> prev/next &nbsp; <kbd>S</kbd> shortlist &nbsp; <kbd>D</kbd> reviewed
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ TOP 3 VIEW ============ -->
+  <main id="top3View" class="view hidden">
+    <section class="top3-panel">
+      <h2>★ Shortlist — pick your Top 3</h2>
+      <p class="hint">Click 1 / 2 / 3 on a card to set its rank, then write why you picked it.</p>
+      <div id="shortlistGrid" class="shortlist-grid"></div>
+      <div id="top3Empty" class="empty-state hidden"><p>No shortlisted candidates for this week yet. Star some in the Review tab.</p></div>
+    </section>
+    <section class="message-panel">
+      <h2>📣 Shareable message</h2>
+      <p class="hint" id="messageHint"></p>
+      <textarea id="messageOutput" readonly></textarea>
+      <button id="copyBtn" class="btn primary">📋 Copy message</button>
+      <span id="copyStatus" class="save-status"></span>
+    </section>
+  </main>
+
+  <!-- ============ IMPORT MODAL ============ -->
+  <div id="importModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="importTitle">Import Tally CSV</h2>
+        <button id="importClose" class="btn icon">✕</button>
+      </div>
+
+      <div id="importStepFile" class="import-step">
+        <label id="dropZone" class="drop-zone">
+          <input type="file" id="csvFileInput" accept=".csv,text/csv">
+          <span>Drop the Tally CSV export here<br>or click to choose a file</span>
+        </label>
+        <p class="hint">Re-importing is safe: existing review state (reviewed / shortlist / notes / ranks) is never overwritten — only candidate info and fresh video links are updated.</p>
+      </div>
+
+      <div id="importStepMap" class="import-step hidden">
+        <p class="hint">Check that the columns are mapped correctly. This mapping is remembered for future imports of the same form.</p>
+        <div class="map-grid">
+          <label>Student name <select id="mapName"></select></label>
+          <label>Week <select id="mapWeek"></select></label>
+          <label>Submitted at <select id="mapSubmitted"></select></label>
+          <label>Email <span class="opt">(optional)</span> <select id="mapEmail"></select></label>
+          <label>Squad / group <span class="opt">(optional)</span> <select id="mapSquad"></select></label>
+        </div>
+        <div class="map-videos">
+          <span>Video upload columns <span class="opt">(tick every column that holds project files)</span></span>
+          <div id="mapVideoCols" class="video-col-checks"></div>
+        </div>
+        <div class="map-preview">
+          <span>Preview (first rows found):</span>
+          <div id="mapPreview"></div>
+        </div>
+        <div class="modal-actions">
+          <button id="importConfirm" class="btn primary">Import candidates</button>
+        </div>
+      </div>
+
+      <div id="importStepDone" class="import-step hidden">
+        <div id="importSummary"></div>
+        <div class="modal-actions">
+          <button id="importDone" class="btn primary">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

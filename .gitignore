@@ -1,0 +1,6 @@
+.DS_Store
+node_modules/
+*.log
+# never commit real exports — they contain student emails and signed links
+sample-data/
+.claude/
