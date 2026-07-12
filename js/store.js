@@ -83,6 +83,12 @@ const sharedStore = {
     }
     await this.saveReview(key, { rank });
   },
+
+  async deleteWeek(week) {
+    const db = await client();
+    const { error } = await db.from("candidates").delete().eq("week", week);
+    if (error) throw new Error("Supabase delete failed: " + error.message);
+  },
 };
 
 // ---------------- localStorage implementation ----------------
@@ -128,6 +134,14 @@ const localStore = {
       }
     }
     if (map[key]) map[key].rank = rank;
+    lsSave(map);
+  },
+
+  async deleteWeek(week) {
+    const map = lsLoad();
+    for (const [k, row] of Object.entries(map)) {
+      if (row.week === week) delete map[k];
+    }
     lsSave(map);
   },
 };

@@ -276,6 +276,13 @@ async function handleCsvText(text) {
     return;
   }
   const saved = loadSavedMapping(headers);
+  if (saved) {
+    // Upload columns differ per week and start out empty, so a column
+    // that held no videos when the mapping was saved (e.g. W4's) must
+    // still be picked up once it has files: merge fresh detection in.
+    const detected = detectMapping(headers, records);
+    saved.videoCols = [...new Set([...(saved.videoCols || []), ...detected.videoCols])];
+  }
   pending = { headers, records, mapping: saved || detectMapping(headers, records) };
   if (saved) {
     await runImport(); // mapping confirmed before — skip straight to import
@@ -380,6 +387,42 @@ function wireEvents() {
     $("notVideoNotice").classList.add("hidden");
     renderAll();
     updatePrefetch();
+  };
+
+  // play an arbitrary pasted link without importing anything
+  $("playLinkBtn").onclick = () => {
+    const url = (window.prompt("Paste a video link to play:") || "").trim();
+    if (!url) return;
+    if (!/^https?:\/\//i.test(url)) { toast("That doesn't look like a link.", true); return; }
+    currentKey = null;
+    const player = $("player");
+    $("playerPlaceholder").classList.add("hidden");
+    $("notVideoNotice").classList.add("hidden");
+    $("reviewControls").classList.add("hidden");
+    $("nameOverlay").textContent = "Pasted link";
+    $("nameOverlay").classList.remove("hidden");
+    const rate = player.playbackRate;
+    player.src = url;
+    player.playbackRate = rate;
+    player.play().catch(() => {});
+    renderList();
+  };
+
+  // remove the selected week's data from this browser
+  $("clearWeekBtn").onclick = async () => {
+    if (!week) return;
+    const n = byWeek().length;
+    if (!window.confirm(`Remove all ${n} ${week} candidates and their review marks? This cannot be undone.`)) return;
+    try {
+      await store.deleteWeek(week);
+      currentKey = null;
+      $("player").removeAttribute("src");
+      $("player").load();
+      $("nameOverlay").classList.add("hidden");
+      $("playerPlaceholder").classList.remove("hidden");
+      await reload();
+      toast(`${week} data removed.`);
+    } catch (err) { toast(err.message, true); }
   };
 
   // import modal

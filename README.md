@@ -29,7 +29,7 @@ The app is 100% static files, so GitHub Pages works perfectly — same setup as 
 2. Open the app → **⬆ Import CSV** → drop the file in.
    - The **first time** you'll be asked to confirm which columns are the student name, week, and video uploads (the app pre-detects them). It remembers this — future imports are one click.
    - **Re-importing is always safe.** Already-imported submissions are matched by their Tally IDs: your reviewed marks, shortlists, notes and ranks are kept, and the video links are refreshed to the newest ones. Nothing is wiped.
-3. Pick the week in the top bar (e.g. **W3**). Only that week's submissions show.
+3. Pick the week in the top bar (e.g. **W3**). Only that week's submissions show. The **🗑** button removes the selected week's candidates and marks from this browser (e.g. to clean out old test data); **▶ Play a link** plays any pasted video URL without importing anything.
 4. Click a candidate — the video **streams immediately** in the player with the student's name shown on top. Use:
    - **Space** play/pause · **← →** seek 5s · **Shift+← / Shift+→** previous/next student
    - **S** shortlist · **D** mark reviewed · speed buttons 1× – 2×
